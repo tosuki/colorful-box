@@ -12,7 +12,8 @@ const ctx = getContext(canvas)
 
 const player = {
     position: [50, 50],//x, y
-    gridSize: 10
+    gridSize: 10,
+    currentDirection: "d"//When the game start, the snake will be moving to the right
 }
 
 const drawHead = (
@@ -23,7 +24,6 @@ const drawHead = (
     ctx.beginPath()
     ctx.strokeStyle = color
 
-    console.log(`entity[drawHead]: ${entity}`)
     ctx.strokeRect(
         entity.position[0],
         entity.position[1],
@@ -47,25 +47,43 @@ const moveEntityDown = (entity) => {
     entity.position[1] += entity.gridSize
 }
 
-document.addEventListener("keypress", (event) => {
-    const key = event.key.toLowerCase()
+const moveEntity = (entity, direction) => {
+    const _direction =
+        direction ?
+        direction :
+        entity.currentDirection
 
-    console.log(player)
-
-    switch (key) {
-        case "w":
-            moveEntityUp(player)
-            break
-        case "s":
-            moveEntityDown(player)
-            break
-        case "a":
-            moveEntityLeft(player)
-            break
-        case "d":
-            moveEntityRight(player)
-            break
+    if (!_direction) {
+        throw `Im not a genius, i cannot guess which direction do you want to move idiot!`
     }
 
+    switch (_direction) {
+        case "w":
+            moveEntityUp(entity)
+            break
+        case "s":
+            moveEntityDown(entity)
+            break
+        case "a":
+            moveEntityLeft(entity)
+            break
+        case "d":
+            moveEntityRight(entity)
+            break
+    }
+}
+
+const checkCanvasLimit = (entityPosition, canvas) => {
+    return entityPosition[0] >= canvas.width ||
+        entityPosition[0] <= 0 ||
+        entityPosition[1] >= canvas.height ||
+        entityPosition[1] <= 0
+}
+
+
+document.addEventListener("keypress", (event) => {
+    moveEntity(player, event.key.toLowerCase())
     drawHead(ctx, player)
 })
+
+// setInterval(() => moveEntity(player, player.currentDirec))
