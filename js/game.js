@@ -13,16 +13,17 @@ const ctx = getContext(canvas)
 const player = {
     position: [50, 50],//x, y
     gridSize: 10,
-    currentDirection: "d"//When the game start, the snake will be moving to the right
+    currentDirection: "d",
+    color: "rgb(200, 0, 0)"//When the game start, the snake will be moving to the right
 }
 
 const drawHead = (
     ctx,
     entity,
-    color = "rgb(200, 0, 0)"
+    color
 ) => {
     ctx.beginPath()
-    ctx.strokeStyle = color
+    ctx.strokeStyle = entity.color || color || "rgb(200, 0, 0)"
 
     ctx.strokeRect(
         entity.position[0],
@@ -34,17 +35,54 @@ const drawHead = (
 
 drawHead(ctx, player)
 
+const applyMove = (entity, direction, vector, value) => {
+    entity.currentDirection = direction
+    entity.position[vector] = value
+
+    return direction
+}
+
+const getNextLeftPosition = (entity) => entity.position[0] - entity.gridSize
+const getNextRightPosition = (entity) => entity.position[0] + entity.gridSize
+const getNextUpPosition = (entity) => entity.position[1] - entity.gridSize
+const getNextDownPosition = (entity) => entity.position[1] + entity.gridSize
+
+
 const moveEntityLeft = (entity) => {
-    entity.position[0] -= entity.gridSize
+    const nextPosition = getNextLeftPosition(entity)
+    
+    if (nextPosition < 0) {
+        return
+    }
+    
+    return applyMove(entity, "a", 0, nextPosition)
 }
 const moveEntityRight = (entity) => {
-    entity.position[0] += entity.gridSize
+    const nextPosition = getNextRightPosition(entity)
+
+    if (nextPosition > canvas.width) {
+        return
+    }
+
+    applyMove(entity, "d", 0, getNextRightPosition(entity))
 }
 const moveEntityUp = (entity) => {
-    entity.position[1] -= entity.gridSize
+    const nextUpPosition = getNextUpPosition(entity)
+
+    if (nextUpPosition < 0) {
+        return
+    }
+
+    applyMove(entity, "w", 1, getNextUpPosition(entity))
 }
 const moveEntityDown = (entity) => {
-    entity.position[1] += entity.gridSize
+    const nextDownPosition = getNextDownPosition(entity)
+
+    if (nextDownPosition >= canvas.height) {
+        return
+    }
+
+    applyMove(entity, "s", 1, getNextDownPosition(entity))
 }
 
 const moveEntity = (entity, direction) => {
@@ -83,6 +121,7 @@ const checkCanvasLimit = (entityPosition, canvas) => {
 
 document.addEventListener("keypress", (event) => {
     moveEntity(player, event.key.toLowerCase())
+    console.log(player)
     drawHead(ctx, player)
 })
 
