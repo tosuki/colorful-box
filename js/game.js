@@ -33,8 +33,6 @@ const drawHead = (
     )
 }
 
-drawHead(ctx, player)
-
 const applyMove = (entity, direction, vector, value) => {
     entity.currentDirection = direction
     entity.position[vector] = value
@@ -122,7 +120,19 @@ const checkCanvasLimit = (entityPosition, canvas) => {
 document.addEventListener("keypress", (event) => {
     moveEntity(player, event.key.toLowerCase())
     console.log(player)
-    drawHead(ctx, player)
+    refresh(ctx, player)
 })
 
+const drawBackground = (ctx, color) => {
+    ctx.beginPath()
+    ctx.fillStyle = color || "#000000"
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
+const refresh = (ctx, player) => {
+    drawBackground(ctx)
+    drawHead(ctx, player)
+}
+
+refresh(ctx, player)
 // setInterval(() => moveEntity(player, player.currentDirec))
