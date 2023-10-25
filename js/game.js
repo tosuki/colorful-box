@@ -49,38 +49,32 @@ const getNextDownPosition = (entity) => entity.position[1] + entity.gridSize
 const moveEntityLeft = (entity) => {
     const nextPosition = getNextLeftPosition(entity)
     
-    if (nextPosition < 0) {
-        return
-    }
-    
-    return applyMove(entity, "a", 0, nextPosition)
+    return nextPosition < 0 ?
+        applyMove(entity, "a", 0, canvas.width) :
+        applyMove(entity, "a", 0, nextPosition)
 }
+
 const moveEntityRight = (entity) => {
     const nextPosition = getNextRightPosition(entity)
 
-    if (nextPosition > canvas.width) {
-        return
-    }
-
-    applyMove(entity, "d", 0, getNextRightPosition(entity))
+    return nextPosition > canvas.width ?
+        applyMove(entity, "d", 0, 0) :
+        applyMove(entity, "d", 0, getNextRightPosition(entity))
 }
 const moveEntityUp = (entity) => {
     const nextUpPosition = getNextUpPosition(entity)
 
-    if (nextUpPosition < 0) {
-        return
-    }
 
-    applyMove(entity, "w", 1, getNextUpPosition(entity))
+    return nextUpPosition < 0 ?
+        applyMove(entity, "w", 1, canvas.height) :
+        applyMove(entity, "w", 1, getNextUpPosition(entity))
 }
 const moveEntityDown = (entity) => {
     const nextDownPosition = getNextDownPosition(entity)
 
-    if (nextDownPosition >= canvas.height) {
-        return
-    }
-
-    applyMove(entity, "s", 1, getNextDownPosition(entity))
+    return nextDownPosition >= canvas.height ?
+        applyMove(entity, "s", 1, 0) :
+        applyMove(entity, "s", 1, getNextDownPosition(entity))
 }
 
 const moveEntity = (entity, direction) => {
@@ -120,7 +114,7 @@ const checkCanvasLimit = (entityPosition, canvas) => {
 document.addEventListener("keypress", (event) => {
     moveEntity(player, event.key.toLowerCase())
     console.log(player)
-    refresh(ctx, player)
+    // refresh(ctx, player)
 })
 
 const drawBackground = (ctx, color) => {
@@ -134,5 +128,9 @@ const refresh = (ctx, player) => {
     drawHead(ctx, player)
 }
 
-refresh(ctx, player)
-// setInterval(() => moveEntity(player, player.currentDirec))
+// refresh(ctx, player)
+setInterval(() => {
+    console.log("Moving entitiy")
+    moveEntity(player, player.currentDirection.toLowerCase())
+    refresh(ctx, player)
+}, 100)
