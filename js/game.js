@@ -1,5 +1,8 @@
 const canvas = document.getElementById("game")
 
+const BACKGROUND_COLOR = "#000000"
+const ENTITY_COLORS = ["#FFFFFF", "#ce8877", "#37a47f"]
+
 const getContext = (element) => {
     if (element.getContext) {
         return element.getContext("2d")
@@ -14,7 +17,16 @@ const player = {
     position: [50, 50],//x, y
     gridSize: 10,
     currentDirection: "d",
-    color: "rgb(200, 0, 0)"//When the game start, the snake will be moving to the right
+    score: 0,
+    color: "rgb(255, 0, 0)"//When the game start, the snake will be moving to the right
+}
+
+
+const fruit = {
+    isSpawned: false,
+    color: "#FFFFFF",
+    position: [],
+    gridSize: 10,
 }
 
 const drawHead = (
@@ -22,6 +34,7 @@ const drawHead = (
     entity,
     color
 ) => {
+    // console.log(entity)
     ctx.beginPath()
     ctx.strokeStyle = entity.color || color || "rgb(200, 0, 0)"
 
@@ -101,6 +114,8 @@ const moveEntity = (entity, direction) => {
             moveEntityRight(entity)
             break
     }
+
+
 }
 
 const checkCanvasLimit = (entityPosition, canvas) => {
@@ -110,11 +125,35 @@ const checkCanvasLimit = (entityPosition, canvas) => {
         entityPosition[1] <= 0
 }
 
+const checkCollisionVector = (vector, entity, fruit) => {
+    return entity.position[vector] >= fruit.position[vector] &&
+           entity.position[vector] <= (fruit.position[vector] + fruit.gridSize)
+}
+
+const checkCollision = (entity, fruit) => {
+    return checkCollisionVector(0, entity, fruit) &&
+        checkCollisionVector(1, entity, fruit)
+}
+
+const addCollision = (player, fruit, callback) => {
+    if (checkCollision(player, fruit)) {
+        return callback(player, fruit)
+    }
+}
+
+const fruitCollision = (player, fruit) => {
+    player.color = fruit.color
+    fruit.isSpawned = false
+}
 
 document.addEventListener("keypress", (event) => {
+    if (event.key.toLowerCase() === "p"){
+        player.score += 1
+    }
+
     moveEntity(player, event.key.toLowerCase())
-    console.log(player)
-    // refresh(ctx, player)
+    addCollision(player, fruit, fruitCollision)
+    refresh(ctx, player, fruit)
 })
 
 const drawBackground = (ctx, color) => {
@@ -123,14 +162,57 @@ const drawBackground = (ctx, color) => {
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
-const refresh = (ctx, player) => {
-    drawBackground(ctx)
-    drawHead(ctx, player)
+const generateFruitCoordinate = (canvas) => {
+    return [Math.random()*canvas.width, Math.random()*canvas.height]
 }
 
-// refresh(ctx, player)
-setInterval(() => {
-    console.log("Moving entitiy")
-    moveEntity(player, player.currentDirection.toLowerCase())
-    refresh(ctx, player)
-}, 100)
+const getRandomColor = (colors) => {
+    return colors[Math.floor(Math.random()*colors.length)]
+}
+
+const generateVectorRandomPosition = (param) => {
+    return Math.floor(Math.random()*param)
+}
+
+const getRandomPosition = (canvas) => {
+    return [
+        generateVectorRandomPosition(canvas.width),
+        generateVectorRandomPosition(canvas.height)
+    ]
+}
+
+const makeFruit = (fruit) => {
+    if (!fruit.isSpawned) {
+        fruit.isSpawned = true
+        fruit.color = getRandomColor(ENTITY_COLORS)
+        fruit.position = getRandomPosition(canvas)
+    }
+}
+
+const isFruitSpawned = (fruit) => {
+    return fruit.isSpawned &&
+           fruit.position.length > 0
+}
+
+const drawFruit = (ctx, fruit) => {
+    if (isFruitSpawned(fruit)) {
+        return drawHead(ctx, fruit)
+    }
+    
+    console.log(fruit)
+    makeFruit(fruit)
+    drawHead(ctx, fruit)
+}
+
+const refresh = (ctx, player, fruit) => {
+    drawBackground(ctx, BACKGROUND_COLOR)
+    drawHead(ctx, player)
+    drawFruit(ctx, fruit)
+}
+
+refresh(ctx, player, fruit)
+// setInterval(() => {
+//     // console.log("Moving entitiy")
+//     moveEntity(player, player.currentDirection.toLowerCase())
+//     refresh(ctx, player, fruit)
+// }, 100)
