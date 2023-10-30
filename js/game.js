@@ -1,7 +1,7 @@
 const canvas = document.getElementById("game")
 
 const BACKGROUND_COLOR = "#000000"
-const ENTITY_COLORS = ["#FFFFFF", "#ce8877", "#37a47f"]
+const ENTITY_COLORS = ["#FFFFFF", "#5b0161", "#37a47f", "#e17ab1", "#fa1cf7"]
 
 const getContext = (element) => {
     if (element.getContext) {
@@ -27,6 +27,22 @@ const fruit = {
     color: "#FFFFFF",
     position: [],
     gridSize: 10,
+}
+
+const drawFilledHead = (
+    ctx,
+    entity,
+    color
+) => {
+    ctx.beginPath()
+    ctx.fillStyle = entity.color || color || "rgb(200, 0, 0)"
+
+    ctx.fillRect(
+        entity.position[0],
+        entity.position[1],
+        entity.gridSize,
+        entity.gridSize
+    )
 }
 
 const drawHead = (
@@ -90,7 +106,7 @@ const moveEntityDown = (entity) => {
         applyMove(entity, "s", 1, getNextDownPosition(entity))
 }
 
-const moveEntity = (entity, direction) => {
+const moveEntity = (entity, direction, fruit) => {
     const _direction =
         direction ?
         direction :
@@ -114,8 +130,6 @@ const moveEntity = (entity, direction) => {
             moveEntityRight(entity)
             break
     }
-
-
 }
 
 const checkCanvasLimit = (entityPosition, canvas) => {
@@ -126,7 +140,7 @@ const checkCanvasLimit = (entityPosition, canvas) => {
 }
 
 const checkCollisionVector = (vector, entity, fruit) => {
-    return entity.position[vector] >= fruit.position[vector] &&
+    return entity.position[vector] >= (fruit.position[vector]) &&
            entity.position[vector] <= (fruit.position[vector] + fruit.gridSize)
 }
 
@@ -144,6 +158,8 @@ const addCollision = (player, fruit, callback) => {
 const fruitCollision = (player, fruit) => {
     player.color = fruit.color
     fruit.isSpawned = false
+
+    player.score += 2
 }
 
 document.addEventListener("keypress", (event) => {
@@ -151,7 +167,8 @@ document.addEventListener("keypress", (event) => {
         player.score += 1
     }
 
-    moveEntity(player, event.key.toLowerCase())
+    moveEntity(player, event.key.toLowerCase(), fruit)
+
     addCollision(player, fruit, fruitCollision)
     refresh(ctx, player, fruit)
 })
@@ -176,8 +193,8 @@ const generateVectorRandomPosition = (param) => {
 
 const getRandomPosition = (canvas) => {
     return [
-        generateVectorRandomPosition(canvas.width),
-        generateVectorRandomPosition(canvas.height)
+        generateVectorRandomPosition(canvas.width - 10),
+        generateVectorRandomPosition(canvas.height - 10)
     ]
 }
 
@@ -196,12 +213,12 @@ const isFruitSpawned = (fruit) => {
 
 const drawFruit = (ctx, fruit) => {
     if (isFruitSpawned(fruit)) {
-        return drawHead(ctx, fruit)
+        return drawFilledHead(ctx, fruit)
     }
     
     console.log(fruit)
     makeFruit(fruit)
-    drawHead(ctx, fruit)
+    drawFilledHead(ctx, fruit)
 }
 
 const refresh = (ctx, player, fruit) => {
@@ -210,9 +227,8 @@ const refresh = (ctx, player, fruit) => {
     drawFruit(ctx, fruit)
 }
 
-refresh(ctx, player, fruit)
-// setInterval(() => {
-//     // console.log("Moving entitiy")
-//     moveEntity(player, player.currentDirection.toLowerCase())
-//     refresh(ctx, player, fruit)
-// }, 100)
+const start = () => {
+    refresh(ctx, player, fruit)
+}
+
+start()
