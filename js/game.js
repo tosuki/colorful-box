@@ -160,6 +160,11 @@ const fruitCollision = (player, fruit) => {
     fruit.isSpawned = false
 
     player.score += 2
+    player.gridSize += fruit.gridSize
+
+    setTimeout(() => {
+        player.gridSize = 10
+    }, 200)
 }
 
 document.addEventListener("keypress", (event) => {
